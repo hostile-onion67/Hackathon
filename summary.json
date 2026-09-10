@@ -1,0 +1,87 @@
+{
+  "generated_at_utc": "2026-09-10T12:29:10.660155+00:00",
+  "team_name": "geeks",
+  "dataset": {
+    "training_records": 1000,
+    "test_records": 350,
+    "input_variables": 8
+  },
+  "data_quality": {
+    "missing_sensor_values": {
+      "train": 44,
+      "test": 17,
+      "imputation_method": "median (fit on training data only)"
+    },
+    "negative_sensor_readings_found": {
+      "train": 1,
+      "test": 1,
+      "treatment": "converted to missing, then median-imputed"
+    },
+    "duplicate_input_combinations": {
+      "train_rows_flagged": 24,
+      "test_rows_flagged": 8,
+      "note": "100% of flagged training rows were labeled Invalid; strong signal"
+    }
+  },
+  "discovered_relationship": {
+    "form": "linear consistency check (diagnostic use)",
+    "equation": "Reference_Parameter ~= -2.0597 + 0.2266*Load_Current_A + 1.0284*Sensor_S2",
+    "note": "Used only to flag physics-inconsistent training rows; the final Reference_Parameter model is a tuned XGBoost regressor capturing the full nonlinear relationship (see model_performance below).",
+    "residual_std_on_trusted_subset": 4.4291
+  },
+  "model_performance": {
+    "validity_classifier": {
+      "algorithm": "XGBoost (hyperparameter-tuned via 5-fold RandomizedSearchCV)",
+      "decision_threshold": 0.168,
+      "cross_validated_metrics": {
+        "f1_invalid_class": 0.914,
+        "precision_invalid_class": 0.911,
+        "recall_invalid_class": 0.918
+      },
+      "features_used": [
+        "Applied_Voltage_kV",
+        "Load_Current_A",
+        "Ambient_Temperature_C",
+        "Test_Duration_min",
+        "Sensor_S1",
+        "Sensor_S2",
+        "Sensor_S3",
+        "Sensor_S4",
+        "n_missing_sensors",
+        "has_negative_sensor",
+        "is_duplicate_input",
+        "physics_predicted_ref"
+      ]
+    },
+    "reference_parameter_regressor": {
+      "algorithm": "XGBoost (hyperparameter-tuned via 5-fold RandomizedSearchCV)",
+      "trained_on": "Valid-labeled training rows only",
+      "cross_validated_metrics": {
+        "r2": 0.9958,
+        "mae": 0.449
+      },
+      "features_used": [
+        "Applied_Voltage_kV",
+        "Load_Current_A",
+        "Ambient_Temperature_C",
+        "Test_Duration_min",
+        "Sensor_S1",
+        "Sensor_S2",
+        "Sensor_S3",
+        "Sensor_S4"
+      ]
+    }
+  },
+  "test_predictions_summary": {
+    "total_rows": 350,
+    "predicted_valid": 308,
+    "predicted_invalid": 42,
+    "predicted_invalid_pct": 12.0,
+    "predicted_reference_parameter": {
+      "min": 12.895,
+      "max": 63.567,
+      "mean": 26.431,
+      "median": 23.158
+    }
+  }
+}
